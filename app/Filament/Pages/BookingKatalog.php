@@ -64,7 +64,10 @@ class BookingKatalog extends Page implements Tables\Contracts\HasTable
                     ->label('Gambar')
                     ->disk('local')
                     ->height(120)
-                    ->extraImgAttributes(['class' => 'object-cover rounded-lg']),
+                    ->extraImgAttributes(fn (Kendaraan $record): array => [
+                        'class' => 'object-cover rounded-lg' . ($record->status === 'tidak_tersedia' ? ' opacity-70' : ''),
+                        'style' => $record->status === 'tidak_tersedia' ? 'filter: grayscale(100%);' : '',
+                    ]),
 
                 TextColumn::make('nama_kendaraan')
                     ->label('Nama')
@@ -90,10 +93,11 @@ class BookingKatalog extends Page implements Tables\Contracts\HasTable
     {
         return [
             Action::make('booking')
-                ->label('Booking')
+                ->label(fn (Kendaraan $record): string => $record->status === 'tidak_tersedia' ? 'Tidak Tersedia' : 'Booking')
                 ->icon('heroicon-o-calendar-days')
                 ->button()
-                ->color('primary')
+                ->color(fn (Kendaraan $record): string => $record->status === 'tidak_tersedia' ? 'gray' : 'primary')
+                ->disabled(fn (Kendaraan $record): bool => $record->status === 'tidak_tersedia')
                 ->modalHeading(fn (Kendaraan $record): string => 'Booking: '.$record->nama_kendaraan)
                 ->modalWidth(MaxWidth::FiveExtraLarge)
                 ->modalSubmitActionLabel('Simpan booking')
