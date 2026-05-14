@@ -5,11 +5,13 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\KendaraanResource\Pages;
 use App\Models\Kendaraan;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -76,6 +78,15 @@ class KendaraanResource extends Resource
                     ->placeholder('Contoh: 12 Jam, 1 Hari')
                     ->required()
                     ->maxLength(255),
+
+                Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'tersedia' => 'Tersedia',
+                        'tidak_tersedia' => 'Tidak Tersedia',
+                    ])
+                    ->default('tersedia')
+                    ->required(),
             ]);
     }
 
@@ -103,6 +114,30 @@ class KendaraanResource extends Resource
                     ->label('Lama Sewa')
                     ->searchable()
                     ->sortable(),
+
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'tersedia' => 'success',
+                        'tidak_tersedia' => 'danger',
+                        default => 'secondary',
+                    })
+                    ->action(
+                        Action::make('ubah_status')
+                            ->form([
+                                Select::make('status')
+                                    ->label('Ubah Status Kendaraan')
+                                    ->options([
+                                        'tersedia' => 'Tersedia',
+                                        'tidak_tersedia' => 'Tidak Tersedia',
+                                    ])
+                                    ->required(),
+                            ])
+                            ->action(function (Kendaraan $record, array $data): void {
+                                $record->update(['status' => $data['status']]);
+                            })
+                    ),
 
                 ImageColumn::make('gambar_kendaraan')
                     ->label('Galeri')

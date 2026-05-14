@@ -17,6 +17,7 @@ class Kendaraan extends Model
         'gambar_kendaraan',
         'harga_kendaraan',
         'lama_sewa',
+        'status',
     ];
 
     protected $casts = [
