@@ -193,11 +193,13 @@ class BookingKatalog extends Page implements Tables\Contracts\HasTable
                                 ->integer()
                                 ->prefix('Rp')
                                 ->minValue(0)
-                                ->required(),
+                                ->placeholder(fn (Kendaraan $record) => $record->harga_kendaraan),
                         ])
                         ->columns(2);
                 })
                 ->action(function (array $data, Kendaraan $record): void {
+                    $data['harga_rental'] = $data['harga_rental'] ?? $record->harga_kendaraan;
+
                     if (strtotime((string) $data['waktu_selesai']) <= strtotime((string) $data['waktu_mulai'])) {
                         Notification::make()
                             ->title('Periode tidak valid')
