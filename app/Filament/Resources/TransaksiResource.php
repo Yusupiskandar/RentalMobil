@@ -17,10 +17,11 @@ class TransaksiResource extends Resource
 {
     protected static ?string $model = Booking::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static ?string $navigationIcon  = 'heroicon-o-clipboard-document-list';
     protected static ?string $navigationLabel = 'Transaksi';
+    protected static ?int    $navigationSort  = 4;
     protected static ?string $pluralModelLabel = 'Transaksi';
-    protected static ?string $modelLabel = 'Transaksi';
+    protected static ?string $modelLabel      = 'Transaksi';
 
     // --- Read-Only: Disable all modification capabilities ---
     public static function canCreate(): bool

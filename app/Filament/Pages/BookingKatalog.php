@@ -25,13 +25,10 @@ class BookingKatalog extends Page implements Tables\Contracts\HasTable
 {
     use Tables\Concerns\InteractsWithTable;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-
+    protected static ?string $navigationIcon  = 'heroicon-o-calendar-days';
     protected static ?string $navigationLabel = 'Booking';
-
-    protected static ?string $title = 'Booking Kendaraan';
-
-    protected static ?int $navigationSort = 5;
+    protected static ?string $title           = 'Booking Kendaraan';
+    protected static ?int    $navigationSort  = 3;
 
     protected static ?string $slug = 'booking';
 

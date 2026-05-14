@@ -18,12 +18,11 @@ class KendaraanResource extends Resource
 {
     protected static ?string $model = Kendaraan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-truck';
-
+    protected static ?string $navigationIcon  = 'heroicon-o-truck';
     protected static ?string $navigationLabel = 'Kendaraan';
+    protected static ?int    $navigationSort  = 1;
 
-    protected static ?string $modelLabel = 'Kendaraan';
-
+    protected static ?string $modelLabel      = 'Kendaraan';
     protected static ?string $pluralModelLabel = 'Kendaraan';
 
     public static function form(Form $form): Form
