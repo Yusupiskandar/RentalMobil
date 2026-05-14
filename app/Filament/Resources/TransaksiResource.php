@@ -3,112 +3,172 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransaksiResource\Pages;
-use App\Filament\Resources\TransaksiResource\RelationManagers;
-use App\Models\Transaksi;
-use Filament\Forms;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
+use App\Models\Booking;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TransaksiResource extends Resource
 {
-    protected static ?string $model = Transaksi::class;
+    protected static ?string $model = Booking::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $navigationLabel = 'Transaksi';
+    protected static ?string $pluralModelLabel = 'Transaksi';
+    protected static ?string $modelLabel = 'Transaksi';
 
-    public static function form(Form $form): Form
+    // --- Read-Only: Disable all modification capabilities ---
+    public static function canCreate(): bool
     {
-        return $form
-            ->schema([
-                Select::make('kota_id')
-                    ->label('Kota')
-                    ->relationship('kota', 'nama')
-                    ->searchable()
-                    ->required(),
+        return false;
+    }
 
-                TextInput::make('pelanggan')
-                    ->label('Pelanggan')
-                    ->required()
-                    ->maxLength(255),
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
 
-                TextInput::make('total')
-                    ->label('Total')
-                    ->numeric()
-                    ->required(),
-
-                DatePicker::make('tanggal')
-                    ->label('Tanggal')
-                    ->required(),
-
-                TextInput::make('status')
-                    ->label('Status')
-                    ->required()
-                    ->maxLength(50),
-            ]);
+    public static function canDelete($record): bool
+    {
+        return false;
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
+                TextColumn::make('created_at')
+                    ->label('Tanggal Transaksi')
+                    ->dateTime('d M Y, H:i')
+                    ->timezone('Asia/Jakarta')
                     ->sortable(),
-                TextColumn::make('kota.nama')
-                    ->label('Kota')
+
+                TextColumn::make('nama_customer')
+                    ->label('Nama Customer')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('pelanggan')
-                    ->label('Pelanggan')
+
+                TextColumn::make('kendaraan.nama_kendaraan')
+                    ->label('Kendaraan')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('total')
-                    ->label('Total')
-                    ->money('idr')
-                    ->sortable(),
-                TextColumn::make('tanggal')
-                    ->label('Tanggal')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->searchable()
+
+                TextColumn::make('no_hp')
+                    ->label('No HP')
+                    ->searchable(),
+
+                TextColumn::make('alamat')
+                    ->label('Alamat')
+                    ->limit(50)
+                    ->tooltip(fn ($record) => $record->alamat),
+
+                TextColumn::make('waktu_sewa')
+                    ->label('Waktu Sewa')
+                    ->getStateUsing(function ($record): string {
+                        $mulai = $record->waktu_mulai?->format('d M Y');
+                        $selesai = $record->waktu_selesai?->format('d M Y');
+                        return $mulai && $selesai ? "{$mulai} - {$selesai}" : '-';
+                    }),
+
+                TextColumn::make('harga_rental')
+                    ->label('Harga Rental')
+                    ->money('IDR')
                     ->sortable(),
             ])
-            ->filters([
-                //
-            ])
+            ->defaultSort('created_at', 'desc')
+            ->filters([])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+            ->bulkActions([]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make('Informasi Transaksi')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label('Tanggal Transaksi')
+                            ->dateTime('d M Y, H:i')
+                            ->timezone('Asia/Jakarta'),
+
+                        TextEntry::make('harga_rental')
+                            ->label('Harga Rental')
+                            ->money('IDR'),
+
+                        TextEntry::make('kendaraan.nama_kendaraan')
+                            ->label('Kendaraan'),
+                    ]),
+
+                Section::make('Data Customer')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('nama_customer')
+                            ->label('Nama Customer'),
+
+                        TextEntry::make('nik')
+                            ->label('NIK'),
+
+                        TextEntry::make('no_hp')
+                            ->label('No HP'),
+
+                        TextEntry::make('alamat')
+                            ->label('Alamat')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Waktu Sewa')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('waktu_mulai')
+                            ->label('Waktu Mulai')
+                            ->dateTime('d M Y, H:i'),
+
+                        TextEntry::make('waktu_selesai')
+                            ->label('Waktu Selesai')
+                            ->dateTime('d M Y, H:i'),
+                    ]),
+
+                Section::make('Dokumen & Foto')
+                    ->columns(2)
+                    ->schema([
+                        ImageEntry::make('foto_ktp')
+                            ->label('Foto KTP')
+                            ->disk('public'),
+
+                        ImageEntry::make('foto_kk')
+                            ->label('Foto KK')
+                            ->disk('public'),
+
+                        ImageEntry::make('foto_sim')
+                            ->label('Foto SIM')
+                            ->disk('public'),
+
+                        ImageEntry::make('foto_dokumentasi')
+                            ->label('Foto Dokumentasi')
+                            ->disk('public'),
+                    ]),
             ]);
     }
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListTransaksis::route('/'),
-            'create' => Pages\CreateTransaksi::route('/create'),
-            'edit' => Pages\EditTransaksi::route('/{record}/edit'),
+            'view'  => Pages\ViewTransaksi::route('/{record}'),
         ];
     }
 }
