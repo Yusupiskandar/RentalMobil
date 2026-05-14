@@ -20,6 +20,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class BookingKatalog extends Page implements Tables\Contracts\HasTable
 {
@@ -217,20 +218,26 @@ class BookingKatalog extends Page implements Tables\Contracts\HasTable
                         throw new Halt;
                     }
 
-                    Booking::create([
-                        'kendaraan_id' => $record->id,
-                        'nama_customer' => $data['nama_customer'],
-                        'nik' => $data['nik'],
-                        'no_hp' => $data['no_hp'],
-                        'alamat' => $data['alamat'],
-                        'foto_ktp' => $data['foto_ktp'],
-                        'foto_kk' => $data['foto_kk'],
-                        'foto_sim' => $data['foto_sim'],
-                        'foto_dokumentasi' => $data['foto_dokumentasi'],
-                        'waktu_mulai' => $data['waktu_mulai'],
-                        'waktu_selesai' => $data['waktu_selesai'],
-                        'harga_rental' => (int) $data['harga_rental'],
-                    ]);
+                    DB::transaction(function () use ($data, $record): void {
+                        Booking::create([
+                            'kendaraan_id' => $record->id,
+                            'nama_customer' => $data['nama_customer'],
+                            'nik' => $data['nik'],
+                            'no_hp' => $data['no_hp'],
+                            'alamat' => $data['alamat'],
+                            'foto_ktp' => $data['foto_ktp'],
+                            'foto_kk' => $data['foto_kk'],
+                            'foto_sim' => $data['foto_sim'],
+                            'foto_dokumentasi' => $data['foto_dokumentasi'],
+                            'waktu_mulai' => $data['waktu_mulai'],
+                            'waktu_selesai' => $data['waktu_selesai'],
+                            'harga_rental' => (int) $data['harga_rental'],
+                        ]);
+
+                        $record->update([
+                            'status' => 'tidak_tersedia',
+                        ]);
+                    });
 
                     Notification::make()
                         ->title('Booking tersimpan')
