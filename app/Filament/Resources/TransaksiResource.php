@@ -74,6 +74,20 @@ class TransaksiResource extends Resource
                         $mulai = $record->waktu_mulai?->format('d M Y');
                         $selesai = $record->waktu_selesai?->format('d M Y');
                         return $mulai && $selesai ? "{$mulai} - {$selesai}" : '-';
+                    })
+                    ->badge()
+                    ->color(function ($record): string {
+                        if (!$record->waktu_mulai || !$record->waktu_selesai) {
+                            return 'secondary';
+                        }
+                        $now = now();
+                        if ($now->greaterThan($record->waktu_selesai)) {
+                            return 'danger';
+                        } elseif ($now->between($record->waktu_mulai, $record->waktu_selesai)) {
+                            return 'success';
+                        } else {
+                            return 'info';
+                        }
                     }),
 
                 TextColumn::make('harga_rental')
