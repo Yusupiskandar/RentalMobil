@@ -18,14 +18,27 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+use Illuminate\Support\Facades\Schema;
+use App\Models\Setting;
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $brandName = 'Rental Mobil';
+        try {
+            if (Schema::hasTable('settings')) {
+                $brandName = Setting::where('key', 'brand_name')->value('value') ?? 'Rental Mobil';
+            }
+        } catch (\Exception $e) {
+            // Bypass during migrations/setup
+        }
+
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName($brandName)
             ->login()
             ->colors([
                 'primary' => Color::Amber,

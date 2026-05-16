@@ -1,5 +1,24 @@
 <section id="vehicles" class="py-5">
     <div class="container">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Terjadi kesalahan:</strong>
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <div class="text-center mb-5">
             <h2 class="fw-bold">Armada Kami</h2>
             <p class="text-muted">Pilih kendaraan yang paling sesuai dengan kebutuhan Anda.</p>
@@ -30,9 +49,11 @@
                         <p class="card-text text-muted mb-3">{{ Str::limit(strip_tags($kendaraan->description), 80) }}</p>
                         <div class="mt-auto">
                             <p class="fs-5 fw-semibold text-primary mb-3">Rp {{ number_format($kendaraan->harga_kendaraan, 0, ',', '.') }} <span class="text-muted fs-6 fw-normal">/ {{ strtolower($kendaraan->lama_sewa) }}</span></p>
-                            <a href="/admin/bookings" class="btn {{ $kendaraan->status === 'tersedia' ? 'btn-outline-primary' : 'btn-secondary disabled' }} w-100">
-                                {{ $kendaraan->status === 'tersedia' ? 'Booking Sekarang' : 'Tidak Tersedia' }}
-                            </a>
+                            @if($kendaraan->status === 'tersedia')
+                                <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#modalBooking{{ $kendaraan->id }}">Booking Sekarang</button>
+                            @else
+                                <button type="button" class="btn btn-secondary disabled w-100">Tidak Tersedia</button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -87,13 +108,59 @@
                             </div>
                             <div class="modal-footer bg-light">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                <a href="/admin/bookings" class="btn {{ $kendaraan->status === 'tersedia' ? 'btn-primary' : 'btn-secondary disabled' }} px-4">
-                                    {{ $kendaraan->status === 'tersedia' ? 'Booking Sekarang' : 'Tidak Tersedia' }}
-                                </a>
+                                @if($kendaraan->status === 'tersedia')
+                                    <button type="button" class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#modalBooking{{ $kendaraan->id }}">Booking Sekarang</button>
+                                @else
+                                    <button type="button" class="btn btn-secondary disabled px-4">Tidak Tersedia</button>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Modal Form Booking -->
+                <div class="modal fade" id="modalBooking{{ $kendaraan->id }}" tabindex="-1" aria-labelledby="modalBookingLabel{{ $kendaraan->id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <form action="{{ route('booking.submit') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" name="kendaraan_id" value="{{ $kendaraan->id }}">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-bold" id="modalBookingLabel{{ $kendaraan->id }}">Form Booking: {{ $kendaraan->nama_kendaraan }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nama Lengkap</label>
+                                        <input type="text" name="nama_lengkap" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">No. HP</label>
+                                        <input type="text" name="no_hp" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Alamat Lengkap</label>
+                                        <textarea name="alamat" class="form-control" rows="3" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Upload Foto KTP</label>
+                                        <input type="file" name="foto_ktp" class="form-control" accept="image/*" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Validasi Keamanan</label>
+                                        <p class="mb-1 text-muted small">Ketik ulang karakter berikut: <strong class="bg-light p-1 border rounded">{{ session('captcha_code') }}</strong></p>
+                                        <input type="text" name="captcha_input" class="form-control" required placeholder="Masukkan captcha">
+                                    </div>
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalKendaraan{{ $kendaraan->id }}">Kembali ke Detail</button>
+                                    <button type="submit" class="btn btn-success px-4">Kirim Pengajuan</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
             </div>
             @empty
             <div class="col-12 text-center py-4">

@@ -15,4 +15,5 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\LandingController;
 
-Route::get('/', [LandingController::class, 'index']);
+Route::get('/', [LandingController::class, 'index'])->name('home');
+Route::post('/booking-submit', [LandingController::class, 'store'])->name('booking.submit');
