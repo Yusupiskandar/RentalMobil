@@ -13,6 +13,24 @@
             color: white;
             padding: 100px 0;
         }
+        .vehicle-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+        }
+        .vehicle-img-wrapper {
+            overflow: hidden;
+            border-top-left-radius: calc(.25rem - 1px);
+            border-top-right-radius: calc(.25rem - 1px);
+        }
+        .vehicle-img-wrapper img {
+            transition: transform 0.4s ease;
+        }
+        .vehicle-card:hover .vehicle-img-wrapper img {
+            transform: scale(1.08);
+        }
     </style>
 </head>
 <body>

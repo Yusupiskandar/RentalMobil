@@ -7,13 +7,15 @@
         <div class="row g-4">
             @forelse($kendaraans as $kendaraan)
             <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <img src="{{ asset('storage/' . str_replace('public/', '', $kendaraan->thumbnail)) }}" 
-                         class="card-img-top object-fit-cover" 
-                         alt="{{ $kendaraan->nama_kendaraan }}" 
-                         style="height: 200px; cursor: pointer; {{ $kendaraan->status === 'tidak_tersedia' ? 'filter: grayscale(100%); opacity: 0.7;' : '' }}"
-                         data-bs-toggle="modal" 
-                         data-bs-target="#modalKendaraan{{ $kendaraan->id }}">
+                <div class="card h-100 shadow-sm border-0 vehicle-card">
+                    <div class="vehicle-img-wrapper">
+                        <img src="{{ asset('storage/' . str_replace('public/', '', $kendaraan->thumbnail)) }}" 
+                             class="card-img-top object-fit-cover" 
+                             alt="{{ $kendaraan->nama_kendaraan }}" 
+                             style="height: 200px; cursor: pointer; {{ $kendaraan->status === 'tidak_tersedia' ? 'filter: grayscale(100%); opacity: 0.7;' : '' }}"
+                             data-bs-toggle="modal" 
+                             data-bs-target="#modalKendaraan{{ $kendaraan->id }}">
+                    </div>
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h5 class="card-title fw-bold mb-0" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalKendaraan{{ $kendaraan->id }}">
